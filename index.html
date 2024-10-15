@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comments Section</title>
+</head>
+<body>
+  <form id="comment-form">
+    <textarea id="comment" placeholder="Оставьте комментарий..." required></textarea>
+    <input type="text" id="username" placeholder="Ваше имя" required>
+    <button type="submit">Отправить</button>
+  </form>
+
+  <div id="comments-section"></div>
+
+  <script>
+    document.getElementById('comment-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const comment = document.getElementById('comment').value;
+      const username = document.getElementById('username').value;
+
+      const response = await fetch('http://localhost:3000/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, comment })
+      });
+
+      const newComment = await response.json();
+
+      const commentsSection = document.getElementById('comments-section');
+      commentsSection.innerHTML += `
+        <div>
+          <strong>${newComment.username}</strong>
+          <p>${newComment.comment}</p>
+          <small>${new Date(newComment.date).toLocaleString()}</small>
+        </div>
+      `;
+
+      document.getElementById('comment').value = '';
+      document.getElementById('username').value = '';
+    });
+
+    window.onload = async function() {
+      const response = await fetch('http://localhost:3000/comments');
+      const comments = await response.json();
+
+      const commentsSection = document.getElementById('comments-section');
+      comments.forEach(comment => {
+        commentsSection.innerHTML += `
+          <div>
+            <strong>${comment.username}</strong>
+            <p>${comment.comment}</p>
+            <small>${new Date(comment.date).toLocaleString()}</small>
+          </div>
+        `;
+      });
+    };
+  </script>
+</body>
+</html>
